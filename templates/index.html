@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+
+	<script src="/static/js/jquery-3.1.1.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div>
+	<div class="all-bg"><img src="/static/img/bg.png"/></div>
+	<div class="header">
+		<img class="fl logo" src="/static/img/logo.png" />
+		<div class="title fl">中移在线视频集中监测智能应用系统</div>
+		<div class="fr infor-r">
+			<span>修改密码</span>
+			<span>管理员</span>
+			<span>退出</span>
+			<span>系统设置</span>
+		</div>
+	</div>
+	<div class="sec-title">海报识别功能演示  </div>
+	<div class="w1000 solution">
+		<div class="adside-right-content fl">
+			<header class="adside-right-block-header"><span>厅店海报识别</span></header>
+			<div class="adside-right-block-apps">
+				<div class="fl">
+					<div class="adside-right-single fl">
+						<h5>海报模板导入</h5>
+						<input type="file" id="file_pic"/>
+					</div>
+				</div>
+				<div class="fl">
+					<div class="adside-right-single fl">
+						<h5>厅店视频接入</h5>
+						<input type="file" id="file_vdo"/>
+					</div>
+				</div>
+				<div class="adside-right-single fr"><input class="inputbtn" type="button" value="以图搜图" onclick="check();"/></div>
+			</div>
+		</div>
+		<div class="adside-right-content fl">
+			<header class="adside-right-block-header"><span>厅店识别计划</span><span><img class="xiala" id="change_img"  onclick="change_img();" src="/static/img/up.png"/></span></header>
+			<div class="adside-right-block-apps" id="change_div" hidden>
+				<div class="fl">
+					<div class="adside-right-single fl">
+						<h5>识别周期:</h5>
+						<input class="inputbox" id="interval" type="text" value="300" style="color: #333333" />秒
+					</div>
+				</div>
+				<div class="fl">
+					<div class="adside-right-single fl">
+						<h5>识别厅店:</h5>
+						<input class="inputbox" ids="" id="group_id" type="text" placeholder="请添加视频路数"  style="color: #333333"  onclick="show_modal();" />
+					</div>
+				</div>
+				<div class="fl">
+					<div class="adside-right-single fl">
+						<h5>识别模板:</h5>
+						<input type="file" id="file_model"/>
+					</div>
+				</div>
+				<div class="adside-right-single fr"><input class="inputbtn" type="button" value="设置" onclick="save();"/></div>
+			</div>
+
+		</div>
+		<div class="adside-right-content fl">
+			<header class="adside-right-block-header"><span>厅店识别结果</span></header>
+			<div class="adside-right-block-apps h">
+				<div id="result" class="result"></div>
+				<div class="pic fl">
+					<div class="fl fwl"><div>海报模板</div><img  id="pic_origin" src="/static/img/moren-pic.png" title="您还未识别海报模板"/></div>
+					<div class="fl fwr"><div>厅店张贴位置</div>
+						<img id="pic_result" src="/static/img/moren-pic.png"/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="clear"></div>
+	<div class="copyright">power by:河南八六三软件股份有限公司</div>
+</div>
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="alert-title"><div class="fl">厅店列表</div><img class="fr" onclick="hide_modal()" src="/static/img/delete.png"/></div>
+			<div class="alert-content">
+				<div class="ch-o">
+					<input type="checkbox" name="shop_id"  id="shop_01" value="厅店1"/>
+					<label style="font-weight: normal" for="shop_01">厅店1</label>
+				</div>
+				<div class="ch-o">
+					<input type="checkbox" name="shop_id"  id="shop_02"  value="厅店2"/>
+					<label style="font-weight: normal" for="shop_02">厅店2</label>
+				</div>
+				<div class="ch-o">
+					<input type="checkbox" name="shop_id"  id="shop_03"  value="厅店3"/>
+					<label style="font-weight: normal" for="shop_03">厅店3</label>
+				</div>
+			</div>
+			<div class="alert-ibt">
+				<input class="inputbtn" value="确定"  type="button" onclick="fill_val()">
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+</div>
+</div>
+</body>
+</html>
+<script type="application/javascript">
+
+
+    var intervalId;
+
+
+	function check() {
+        $("#result").html("")
+        $("#pic_result").attr("src","/static/img/moren-pic.png")
+        $.ajax({
+            url : "/do_check",
+            type : 'POST',
+            data : {},
+            // 告诉jQuery不要去处理发送的数据
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            beforeSend:function(){
+                $("#result").html("正在识别，请稍候")
+                console.log("正在识别，请稍候");
+                intervalId= window.setInterval(function () { $("#pic_result").attr("src","/show_photo/file_check.jpg?"+Math.random()) }, 100);
+            },
+            success : function(responseStr) {
+                window.clearInterval(intervalId)
+                $("#result").html(responseStr)
+				if(responseStr.indexOf("识别成功")!=-1){
+                    $("#pic_result").attr("src","/show_photo/file_check.jpg?"+Math.random())
+                }
+                console.log("识别成功："+responseStr);
+            },
+            error : function(responseStr) {
+                window.clearInterval(intervalId)
+                $("#result").html("识别失败")
+                console.log("识别失败："+responseStr);
+            }
+        });
+        // window.setTimeout(sendImg, 500);
+    }
+
+    function save() {
+        var formData = new FormData();
+        var interval = $("#interval").val();
+        var ids=$("#group_id").attr("ids")
+        formData.append("file_model",$("#file_model")[0].files[0]);
+        formData.append("interval",interval);
+        formData.append("ids",ids)
+        $("#result").html("")
+        $.ajax({
+            url : "/do_save",
+            type : 'POST',
+            data : formData,
+            // 告诉jQuery不要去处理发送的数据
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            beforeSend:function(){
+                $("#result").html("正在保存，请稍候")
+                console.log("正在保存，请稍候");
+            },
+            success : function(responseStr) {
+                $("#result").html(responseStr)
+                console.log("保存成功："+responseStr);
+            },
+            error : function(responseStr) {
+                $("#result").html("保存失败")
+                console.log("保存失败："+responseStr);
+            }
+        });
+
+        // window.setTimeout(sendImg, 500);
+    }
+
+    function change_img() {
+	    if($("#change_img").attr("src")=="/static/img/up.png"){
+            $("#change_div").show();
+	        $("#change_img").attr("src","/static/img/down.png");
+		}else{
+            $("#change_div").hide();
+	        $("#change_img").attr("src","/static/img/up.png");
+        }
+    }
+    
+    function show_modal() {
+        $('#myModal').modal('show');
+    }
+    function hide_modal() {
+        $('#myModal').modal('hide');
+    }
+
+    function fill_val() {
+        $('#myModal').modal('hide');
+		val="";
+		ids="";
+        check_list=$("input[name='shop_id']:checked");
+        for(i=0;i<check_list.length;i++){
+            val=val+$(check_list[i]).val()+","
+            ids=ids+$(check_list[i]).attr("id")+","
+		}
+        $("#group_id").val(val);
+        $("#group_id").attr("ids",ids);
+    }
+
+
+
+    function show_origin(file_id){
+        $("#pic_origin").attr("src","/static/img/moren-pic.png")
+        $("#pic_result").attr("src","/static/img/moren-pic.png")
+        var formData = new FormData();
+        formData.append("file_pic",$("#"+file_id)[0].files[0]);
+        $.ajax({
+            url : "/do_upload_origin",
+            type : 'POST',
+            data : formData,
+            // 告诉jQuery不要去处理发送的数据
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            beforeSend:function(){
+                console.log("正在识别，请稍候");
+            },
+            success : function(responseStr) {
+                if(responseStr="成功"){
+                    $("#pic_origin").attr("src","/show_photo/file_pic.jpg?"+Math.random())
+                }
+                console.log("识别成功："+responseStr);
+            },
+            error : function(responseStr) {
+                console.log("识别失败："+responseStr);
+            }
+        });
+	}
+
+    function do_upload_vdo(){
+        var formData = new FormData();
+        formData.append("file_vdo",$("#file_vdo")[0].files[0]);
+        $.ajax({
+            url : "/do_upload_vdo",
+            type : 'POST',
+            data : formData,
+            // 告诉jQuery不要去处理发送的数据
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            beforeSend:function(){
+                $("#result").html("正在上传，请稍候")
+                console.log("正在上传，请稍候");
+            },
+            success : function(responseStr) {
+                if(responseStr="成功"){
+                    $("#result").html("上传完毕")
+                }
+                console.log("上传完毕："+responseStr);
+            },
+            error : function(responseStr) {
+                console.log("上传失败："+responseStr);
+            }
+        });
+    }
+    $("#file_pic").change(function () {
+        show_origin("file_pic");
+    });
+    $("#file_model").change(function () {
+        show_origin("file_model");
+    });
+    $("#file_vdo").change(function () {
+        do_upload_vdo();
+    });
+
+</script>
