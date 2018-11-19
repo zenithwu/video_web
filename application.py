@@ -4,11 +4,9 @@ import ctypes
 import os
 import shutil
 import sys
-import time
 
-import cv2
+# import cv2
 from flask import Flask, render_template, request, make_response, Response
-from skimage.measure import compare_ssim
 
 reload(sys)
 sys.setdefaultencoding('utf8')

@@ -1,6 +1,2 @@
-opencv-python
 flask
 ConfigParser
-numpy
-scikit-image
-scipy
